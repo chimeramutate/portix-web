@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Typography, Row, Col, Card, Button, Dropdown, Tag, Space, message } from 'antd';
+import { Typography, Row, Col, Card, Button, Dropdown, Tag, message } from 'antd';
 import {
   AppleOutlined,
   DesktopOutlined,
@@ -7,7 +6,6 @@ import {
   DownloadOutlined,
   FileZipOutlined,
   CheckCircleOutlined,
-  SafetyCertificateOutlined,
   AppstoreOutlined,
   KeyOutlined,
   FileTextOutlined,
@@ -25,36 +23,45 @@ type Platform = {
   options: { label: string; href: string }[];
 };
 
+const PORTIX_VERSION = 'v1.0.0';
+const KEEWEB_VERSION = 'v1.18.7';
+
+const PORTIX_SHA256 = {
+  macos: '6e9c819384d6dc4907bebaf4cf3b6cd04d9015f80c95a70616d6228b02f79220',
+  linux: '9ee18b56efd0522ecfea2f2ef0eadaef9970a92ade558c2dfed56ec2f0b02f24',
+  windows: 'b6a21bf99aa69359f0697f9a2aa0e269f5daf2d8af6cadd3ee7ca52a6693e167',
+};
+
 const platforms: Platform[] = [
   {
     icon: <AppleOutlined />,
     name: 'macOS',
     desc: 'Universal binary for Apple Silicon & Intel',
-    primary: { label: 'Download .dmg', href: '#' },
+    primary: { label: `Download ${PORTIX_VERSION} (.zip)`, href: `https://github.com/chimeramutate/portix/releases/download/${PORTIX_VERSION}/portix-macos-${PORTIX_VERSION}.zip` },
     options: [
-      { label: '.dmg (Universal)', href: '#' },
-      { label: '.zip (Universal)', href: '#' },
+      { label: `.zip (${PORTIX_VERSION})`, href: `https://github.com/chimeramutate/portix/releases/download/${PORTIX_VERSION}/portix-macos-${PORTIX_VERSION}.zip` },
+      { label: 'View release notes', href: `https://github.com/chimeramutate/portix/releases/tag/${PORTIX_VERSION}` },
     ],
   },
   {
     icon: <CodeOutlined />,
     name: 'Linux',
     desc: 'Flatpak and Snap packages available',
-    primary: { label: 'Download Flatpak', href: '#' },
+    primary: { label: `Download ${PORTIX_VERSION} (.tar.gz)`, href: `https://github.com/chimeramutate/portix/releases/download/${PORTIX_VERSION}/portix-linux-${PORTIX_VERSION}.tar.gz` },
     options: [
-      { label: 'Flatpak (.flatpak)', href: '#' },
+      { label: `.tar.gz (${PORTIX_VERSION})`, href: `https://github.com/chimeramutate/portix/releases/download/${PORTIX_VERSION}/portix-linux-${PORTIX_VERSION}.tar.gz` },
       { label: 'Snap package', href: 'https://snapcraft.io/portix' },
-      { label: '.AppImage', href: '#' },
+      { label: 'View release notes', href: `https://github.com/chimeramutate/portix/releases/tag/${PORTIX_VERSION}` },
     ],
   },
   {
     icon: <DesktopOutlined />,
     name: 'Windows',
     desc: 'Native build with full feature parity',
-    primary: { label: 'Download .exe', href: '#' },
+    primary: { label: `Download ${PORTIX_VERSION} (.zip)`, href: `https://github.com/chimeramutate/portix/releases/download/${PORTIX_VERSION}/portix-windows-${PORTIX_VERSION}.zip` },
     options: [
-      { label: 'Installer (.exe)', href: '#' },
-      { label: 'Portable (.zip)', href: '#' },
+      { label: `.zip (${PORTIX_VERSION})`, href: `https://github.com/chimeramutate/portix/releases/download/${PORTIX_VERSION}/portix-windows-${PORTIX_VERSION}.zip` },
+      { label: 'View release notes', href: `https://github.com/chimeramutate/portix/releases/tag/${PORTIX_VERSION}` },
     ],
   },
 ];
@@ -180,12 +187,18 @@ export default function Download() {
           <Paragraph style={{ color: '#94a3b8', fontSize: 16, marginTop: 16 }}>
             Free and open-source. Choose your operating system and start managing servers in seconds.
           </Paragraph>
-          <div style={{ marginTop: 20, display: 'inline-flex' }}>
+          <div style={{ marginTop: 20, display: 'inline-flex', gap: 12, flexWrap: 'wrap' }}>
             <Tag
               icon={<span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#10b981', marginRight: 6 }} />}
               style={{ borderRadius: 999, padding: '4px 16px', fontSize: 14, color: '#94a3b8', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)' }}
             >
-              Latest release: v2.0.0
+              Portix {PORTIX_VERSION}
+            </Tag>
+            <Tag
+              icon={<span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#3b82f6', marginRight: 6 }} />}
+              style={{ borderRadius: 999, padding: '4px 16px', fontSize: 14, color: '#94a3b8', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)' }}
+            >
+              KeWeb {KEEWEB_VERSION}
             </Tag>
           </div>
         </div>
@@ -197,15 +210,41 @@ export default function Download() {
         </Row>
 
         <div style={{ marginTop: 40, display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
-          <Button type="link" icon={<KeyOutlined />} style={{ color: '#64748b', fontSize: 14 }} onClick={() => message.info('Checksums will be available with the first release.')}>
+          <Button
+            type="link"
+            icon={<KeyOutlined />}
+            style={{ color: '#64748b', fontSize: 14 }}
+            onClick={() => {
+              const checksums = `SHA256 Checksums for Portix ${PORTIX_VERSION}
+
+macOS (portix-macos-${PORTIX_VERSION}.zip):
+${PORTIX_SHA256.macos}
+
+Linux (portix-linux-${PORTIX_VERSION}.tar.gz):
+${PORTIX_SHA256.linux}
+
+Windows (portix-windows-${PORTIX_VERSION}.zip):
+${PORTIX_SHA256.windows}
+
+Download: https://github.com/chimeramutate/portix/releases/tag/${PORTIX_VERSION}`;
+              message.info({
+                content: (
+                  <pre style={{ fontSize: 13, fontFamily: 'monospace', lineHeight: 1.5, textAlign: 'left' }}>
+{checksums}
+                  </pre>
+                ),
+                duration: 30000,
+              });
+            }}
+          >
             SHA256 checksums
           </Button>
           <span style={{ color: '#334155' }}>·</span>
-          <Button type="link" icon={<AppstoreOutlined />} style={{ color: '#64748b', fontSize: 14 }} onClick={() => message.info('Releases page coming soon.')}>
+          <Button type="link" icon={<AppstoreOutlined />} style={{ color: '#64748b', fontSize: 14 }} href={`https://github.com/chimeramutate/portix/releases`}>
             All releases
           </Button>
           <span style={{ color: '#334155' }}>·</span>
-          <Button type="link" icon={<FileTextOutlined />} style={{ color: '#64748b', fontSize: 14 }} href="#">
+          <Button type="link" icon={<FileTextOutlined />} style={{ color: '#64748b', fontSize: 14 }} href="https://github.com/chimeramutate/portix/blob/main/LICENSE">
             View license
           </Button>
         </div>
