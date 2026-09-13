@@ -65,7 +65,7 @@ export default function Hero() {
                 fontSize: 12,
               }}
             >
-              v2.0 · Rust + Flutter
+              Native Rust · Flutter Desktop
             </Tag>
 
             <Title
@@ -79,9 +79,9 @@ export default function Hero() {
                 fontWeight: 700,
               }}
             >
-              The SSH client
+              Portix — the native SSH client
               <br />
-              <span className="text-gradient">built for speed.</span>
+              <span className="text-gradient">built with Rust, powered by Flutter.</span>
             </Title>
 
             <Paragraph
@@ -138,9 +138,27 @@ export default function Hero() {
             </Space>
           </div>
 
+<<<<<<< HEAD
           {/* Right: interactive laptop */}
           <div className="animate-fade-up" style={{ animationDelay: '200ms' }}>
             <LaptopScene className="hero-laptop" />
+=======
+          {/* Right: terminal image */}
+          <div className="animate-fade-up" style={{ animationDelay: '200ms' }}>
+            <div style={{ position: 'relative', maxWidth: 448, margin: '0 auto' }}>
+              <img
+                src="/ssh/ssh.png"
+                alt="Terminal"
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  borderRadius: 12,
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+                }}
+              />
+            </div>
+>>>>>>> 454f219 (Add images for SFTP and SSH components; update GettingStarted and Hero components for improved workflow presentation)
           </div>
         </div>
       </div>
