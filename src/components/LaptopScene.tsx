@@ -140,13 +140,14 @@ export default function LaptopScene({ className = '' }: LaptopSceneProps) {
     screenGroup.add(screen);
 
     const screenGlow = new THREE.Mesh(
-      new THREE.PlaneGeometry(4.32, 2.48),
+      new THREE.PlaneGeometry(4.32, 2.16),
       new THREE.MeshBasicMaterial({ color: 0x092538, transparent: true, opacity: 0.9 }),
     );
     screenGlow.position.set(0, 1.52, -0.17);
     screenGroup.add(screenGlow);
 
     const terminalLines = new THREE.Group();
+    terminalLines.visible = false;
     terminalLines.position.set(-1.85, 1.52, -0.2);
     const lineColors = [0x34d399, 0x22d3ee, 0x6ee7b7, 0x59748d, 0x59748d, 0x34d399];
     lineColors.forEach((color, index) => {
@@ -158,6 +159,25 @@ export default function LaptopScene({ className = '' }: LaptopSceneProps) {
     cursor.position.set(1.34, -0.53, 0);
     terminalLines.add(cursor);
     screenGroup.add(terminalLines);
+
+    const terminalTexture = new THREE.TextureLoader().load(
+      '/assets/images/ssh_terminal.png',
+      (texture) => {
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        texture.needsUpdate = true;
+        const screenMaterial = screenGlow.material as THREE.MeshBasicMaterial;
+        screenMaterial.map = texture;
+        screenMaterial.color.set(0xffffff);
+        screenMaterial.opacity = 1;
+        screenMaterial.needsUpdate = true;
+        terminalLines.visible = false;
+      },
+      undefined,
+      () => {
+        terminalLines.visible = true;
+      },
+    );
 
     const logo = new THREE.Mesh(new THREE.RingGeometry(0.12, 0.17, 6), cyanMaterial);
     logo.position.set(0, 1.52, -0.28);
@@ -244,6 +264,7 @@ export default function LaptopScene({ className = '' }: LaptopSceneProps) {
       mount.removeEventListener('pointerup', onPointerUp);
       mount.removeEventListener('pointercancel', onPointerUp);
       mount.removeEventListener('pointerleave', onPointerUp);
+      terminalTexture.dispose();
       renderer.dispose();
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh) {
