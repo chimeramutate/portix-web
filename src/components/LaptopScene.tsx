@@ -5,6 +5,8 @@ type LaptopSceneProps = {
   className?: string;
 };
 
+type LaptopView = 'ssh' | 'sftp';
+
 function createRoundedPanel(width: number, height: number, depth: number, color: number, radius = 0.08) {
   const shape = new THREE.Shape();
   const x = -width / 2;
@@ -33,8 +35,20 @@ function createKey(x: number, y: number, z: number, width: number, height: numbe
 
 export default function LaptopScene({ className = '' }: LaptopSceneProps) {
   const mountRef = useRef<HTMLDivElement>(null);
+  const activeViewRef = useRef<LaptopView>('ssh');
+  const screenMaterialRef = useRef<THREE.MeshBasicMaterial | null>(null);
+  const texturesRef = useRef<Record<LaptopView, THREE.Texture | null>>({ ssh: null, sftp: null });
+  const [activeView, setActiveView] = useState<LaptopView>('ssh');
   const [isDragging, setIsDragging] = useState(false);
   const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    activeViewRef.current = activeView;
+    const texture = texturesRef.current[activeView];
+    if (!texture || !screenMaterialRef.current) return;
+    screenMaterialRef.current.map = texture;
+    screenMaterialRef.current.needsUpdate = true;
+  }, [activeView]);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -160,24 +174,40 @@ export default function LaptopScene({ className = '' }: LaptopSceneProps) {
     terminalLines.add(cursor);
     screenGroup.add(terminalLines);
 
-    const terminalTexture = new THREE.TextureLoader().load(
-      '/assets/images/ssh_terminal.png',
-      (texture) => {
-        texture.colorSpace = THREE.SRGBColorSpace;
-        texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-        texture.needsUpdate = true;
-        const screenMaterial = screenGlow.material as THREE.MeshBasicMaterial;
-        screenMaterial.map = texture;
-        screenMaterial.color.set(0xffffff);
-        screenMaterial.opacity = 1;
-        screenMaterial.needsUpdate = true;
-        terminalLines.visible = false;
-      },
-      undefined,
-      () => {
-        terminalLines.visible = true;
-      },
-    );
+    let sshTexture: THREE.Texture | null = null;
+    let sftpTexture: THREE.Texture | null = null;
+    screenMaterialRef.current = screenGlow.material as THREE.MeshBasicMaterial;
+    const applyScreenTexture = () => {
+      const texture = activeViewRef.current === 'sftp' ? sftpTexture : sshTexture;
+      if (!texture || !screenMaterialRef.current) return;
+      screenMaterialRef.current.map = texture;
+      screenMaterialRef.current.color.set(0xffffff);
+      screenMaterialRef.current.opacity = 1;
+      screenMaterialRef.current.needsUpdate = true;
+      terminalLines.visible = false;
+    };
+    const prepareTexture = (texture: THREE.Texture) => {
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      texture.needsUpdate = true;
+    };
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.load('/assets/images/ssh_terminal.png', (texture) => {
+      prepareTexture(texture);
+      sshTexture = texture;
+      texturesRef.current.ssh = texture;
+      applyScreenTexture();
+    }, undefined, () => {
+      if (!sftpTexture) terminalLines.visible = true;
+    });
+    textureLoader.load('/assets/images/sftp.png', (texture) => {
+      prepareTexture(texture);
+      sftpTexture = texture;
+      texturesRef.current.sftp = texture;
+      applyScreenTexture();
+    }, undefined, () => {
+      if (!sshTexture) terminalLines.visible = true;
+    });
 
     const logo = new THREE.Mesh(new THREE.RingGeometry(0.12, 0.17, 6), cyanMaterial);
     logo.position.set(0, 1.52, -0.28);
@@ -264,7 +294,11 @@ export default function LaptopScene({ className = '' }: LaptopSceneProps) {
       mount.removeEventListener('pointerup', onPointerUp);
       mount.removeEventListener('pointercancel', onPointerUp);
       mount.removeEventListener('pointerleave', onPointerUp);
-      terminalTexture.dispose();
+      sshTexture?.dispose();
+      sftpTexture?.dispose();
+      texturesRef.current.ssh = null;
+      texturesRef.current.sftp = null;
+      screenMaterialRef.current = null;
       renderer.dispose();
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh) {
@@ -280,9 +314,27 @@ export default function LaptopScene({ className = '' }: LaptopSceneProps) {
   return (
     <div className={`laptop-scene ${className}`} ref={mountRef} data-dragging={isDragging}>
       {hasError ? <div className="laptop-fallback">WebGL preview unavailable</div> : null}
+      <div className="laptop-view-switcher" role="group" aria-label="Laptop preview mode">
+        <button
+          type="button"
+          className={activeView === 'ssh' ? 'is-active' : ''}
+          aria-pressed={activeView === 'ssh'}
+          onClick={() => setActiveView('ssh')}
+        >
+          SSH
+        </button>
+        <button
+          type="button"
+          className={activeView === 'sftp' ? 'is-active' : ''}
+          aria-pressed={activeView === 'sftp'}
+          onClick={() => setActiveView('sftp')}
+        >
+          SFTP
+        </button>
+      </div>
       <div className="laptop-scene-badge">
         <span className="laptop-scene-dot" />
-        <span>{isDragging ? 'Release to inspect' : 'Drag to rotate'}</span>
+        <span>{isDragging ? 'Release to inspect' : `${activeView.toUpperCase()} · Drag to rotate`}</span>
       </div>
     </div>
   );
