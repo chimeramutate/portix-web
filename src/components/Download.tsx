@@ -1,8 +1,5 @@
 import { Typography, Row, Col, Card, Button, Dropdown, Tag, message } from 'antd';
 import {
-  AppleOutlined,
-  DesktopOutlined,
-  CodeOutlined,
   DownloadOutlined,
   FileZipOutlined,
   CheckCircleOutlined,
@@ -11,60 +8,33 @@ import {
   FileTextOutlined,
 } from '@ant-design/icons';
 import { useInView } from '@/hooks/useScroll';
-import type { ReactNode } from 'react';
+import { useLatestRelease } from '@/hooks/useLatestRelease';
+import { getPortixPlatforms, Platform } from './portixPlatforms';
 
 const { Title, Paragraph, Text } = Typography;
 
-type Platform = {
-  icon: ReactNode;
-  name: string;
-  desc: string;
-  primary: { label: string; href: string };
-  options: { label: string; href: string }[];
-};
-
-const PORTIX_VERSION = 'v1.0.0';
 const KEEWEB_VERSION = 'v1.18.7';
 
-const PORTIX_SHA256 = {
-  macos: '6e9c819384d6dc4907bebaf4cf3b6cd04d9015f80c95a70616d6228b02f79220',
-  linux: '9ee18b56efd0522ecfea2f2ef0eadaef9970a92ade558c2dfed56ec2f0b02f24',
-  windows: 'b6a21bf99aa69359f0697f9a2aa0e269f5daf2d8af6cadd3ee7ca52a6693e167',
+// Default checksums - will be updated when actual releases are fetched
+const DEFAULT_CHECKSUMS: Record<string, Record<string, string>> = {
+  macos: {
+    'v1.0.0': '6e9c819384d6dc4907bebaf4cf3b6cd04d9015f80c95a70616d6228b02f79220',
+  },
+  linux: {
+    'v1.0.0': '9ee18b56efd0522ecfea2f2ef0eadaef9970a92ade558c2dfed56ec2f0b02f24',
+  },
+  windows: {
+    'v1.0.0': 'b6a21bf99aa69359f0697f9a2aa0e269f5daf2d8af6cadd3ee7ca52a6693e167',
+  },
 };
 
-const platforms: Platform[] = [
-  {
-    icon: <AppleOutlined />,
-    name: 'macOS',
-    desc: 'Universal binary for Apple Silicon & Intel',
-    primary: { label: `Download ${PORTIX_VERSION} (.zip)`, href: `https://github.com/chimeramutate/portix/releases/download/${PORTIX_VERSION}/portix-macos-${PORTIX_VERSION}.zip` },
-    options: [
-      { label: `.zip (${PORTIX_VERSION})`, href: `https://github.com/chimeramutate/portix/releases/download/${PORTIX_VERSION}/portix-macos-${PORTIX_VERSION}.zip` },
-      { label: 'View release notes', href: `https://github.com/chimeramutate/portix/releases/tag/${PORTIX_VERSION}` },
-    ],
-  },
-  {
-    icon: <CodeOutlined />,
-    name: 'Linux',
-    desc: 'Flatpak and Snap packages available',
-    primary: { label: `Download ${PORTIX_VERSION} (.tar.gz)`, href: `https://github.com/chimeramutate/portix/releases/download/${PORTIX_VERSION}/portix-linux-${PORTIX_VERSION}.tar.gz` },
-    options: [
-      { label: `.tar.gz (${PORTIX_VERSION})`, href: `https://github.com/chimeramutate/portix/releases/download/${PORTIX_VERSION}/portix-linux-${PORTIX_VERSION}.tar.gz` },
-      { label: 'Snap package', href: 'https://snapcraft.io/portix' },
-      { label: 'View release notes', href: `https://github.com/chimeramutate/portix/releases/tag/${PORTIX_VERSION}` },
-    ],
-  },
-  {
-    icon: <DesktopOutlined />,
-    name: 'Windows',
-    desc: 'Native build with full feature parity',
-    primary: { label: `Download ${PORTIX_VERSION} (.zip)`, href: `https://github.com/chimeramutate/portix/releases/download/${PORTIX_VERSION}/portix-windows-${PORTIX_VERSION}.zip` },
-    options: [
-      { label: `.zip (${PORTIX_VERSION})`, href: `https://github.com/chimeramutate/portix/releases/download/${PORTIX_VERSION}/portix-windows-${PORTIX_VERSION}.zip` },
-      { label: 'View release notes', href: `https://github.com/chimeramutate/portix/releases/tag/${PORTIX_VERSION}` },
-    ],
-  },
-];
+function getChecksums(version: string) {
+  return {
+    macos: DEFAULT_CHECKSUMS.macos[version] || '',
+    linux: DEFAULT_CHECKSUMS.linux[version] || '',
+    windows: DEFAULT_CHECKSUMS.windows[version] || '',
+  };
+}
 
 function DownloadCard({ platform, index }: { platform: Platform; index: number }) {
   const { ref, inView } = useInView<HTMLDivElement>();
@@ -173,6 +143,10 @@ function DownloadCard({ platform, index }: { platform: Platform; index: number }
 }
 
 export default function Download() {
+  const { version, loading } = useLatestRelease('chimeramutate/portix');
+  const platforms = getPortixPlatforms(version);
+  const checksums = getChecksums(version);
+
   return (
     <section id="download" style={{ position: 'relative', paddingTop: 96, paddingBottom: 96 }}>
       <div className="grid-bg radial-fade" style={{ position: 'absolute', inset: 0, opacity: 0.4 }} aria-hidden />
@@ -192,7 +166,7 @@ export default function Download() {
               icon={<span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#10b981', marginRight: 6 }} />}
               style={{ borderRadius: 999, padding: '4px 16px', fontSize: 14, color: '#94a3b8', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)' }}
             >
-              Portix {PORTIX_VERSION}
+              Portix {loading ? '...' : version}
             </Tag>
             <Tag
               icon={<span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#3b82f6', marginRight: 6 }} />}
@@ -215,22 +189,22 @@ export default function Download() {
             icon={<KeyOutlined />}
             style={{ color: '#64748b', fontSize: 14 }}
             onClick={() => {
-              const checksums = `SHA256 Checksums for Portix ${PORTIX_VERSION}
+              const checksumsText = `SHA256 Checksums for Portix ${version}
 
-macOS (portix-macos-${PORTIX_VERSION}.zip):
-${PORTIX_SHA256.macos}
+macOS (portix-macos-${version}.zip):
+${checksums.macos}
 
-Linux (portix-linux-${PORTIX_VERSION}.tar.gz):
-${PORTIX_SHA256.linux}
+Linux (portix-linux-${version}.tar.gz):
+${checksums.linux}
 
-Windows (portix-windows-${PORTIX_VERSION}.zip):
-${PORTIX_SHA256.windows}
+Windows (portix-windows-${version}.zip):
+${checksums.windows}
 
-Download: https://github.com/chimeramutate/portix/releases/tag/${PORTIX_VERSION}`;
+Download: https://github.com/chimeramutate/portix/releases/tag/${version}`;
               message.info({
                 content: (
                   <pre style={{ fontSize: 13, fontFamily: 'monospace', lineHeight: 1.5, textAlign: 'left' }}>
-{checksums}
+{checksumsText}
                   </pre>
                 ),
                 duration: 30000,
@@ -240,7 +214,7 @@ Download: https://github.com/chimeramutate/portix/releases/tag/${PORTIX_VERSION}
             SHA256 checksums
           </Button>
           <span style={{ color: '#334155' }}>·</span>
-          <Button type="link" icon={<AppstoreOutlined />} style={{ color: '#64748b', fontSize: 14 }} href={`https://github.com/chimeramutate/portix/releases`}>
+          <Button type="link" icon={<AppstoreOutlined />} style={{ color: '#64748b', fontSize: 14 }} href="https://github.com/chimeramutate/portix/releases">
             All releases
           </Button>
           <span style={{ color: '#334155' }}>·</span>

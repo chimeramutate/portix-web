@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Layout, Button, Typography, Space, Drawer } from 'antd';
 import { MenuOutlined, CloseOutlined } from '@ant-design/icons';
-import type { MenuProps } from 'antd';
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -24,11 +23,6 @@ export default function Navbar() {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  const menuItems: MenuProps['items'] = navLinks.map((l) => ({
-    key: l.href,
-    label: <a href={l.href}>{l.label}</a>,
-  }));
 
   return (
     <Header
