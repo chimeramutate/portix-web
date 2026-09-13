@@ -1,12 +1,11 @@
-import { Button, Typography, Tag, Space } from 'antd';
 import {
   ArrowRightOutlined,
-  DownloadOutlined,
-  CodeOutlined,
   BranchesOutlined,
+  CodeOutlined,
   DatabaseOutlined,
+  DownloadOutlined,
 } from '@ant-design/icons';
-import LaptopScene from '@/components/LaptopScene';
+import { Button, Space, Tag, Typography } from 'antd';
 
 const { Title, Paragraph } = Typography;
 
@@ -138,11 +137,6 @@ export default function Hero() {
             </Space>
           </div>
 
-<<<<<<< HEAD
-          {/* Right: interactive laptop */}
-          <div className="animate-fade-up" style={{ animationDelay: '200ms' }}>
-            <LaptopScene className="hero-laptop" />
-=======
           {/* Right: terminal image */}
           <div className="animate-fade-up" style={{ animationDelay: '200ms' }}>
             <div style={{ position: 'relative', maxWidth: 448, margin: '0 auto' }}>
@@ -158,7 +152,6 @@ export default function Hero() {
                 }}
               />
             </div>
->>>>>>> 454f219 (Add images for SFTP and SSH components; update GettingStarted and Hero components for improved workflow presentation)
           </div>
         </div>
       </div>
