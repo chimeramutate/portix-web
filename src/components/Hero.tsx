@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { Button, Typography, Tag, Space } from 'antd';
 import {
   ArrowRightOutlined,
@@ -7,27 +6,11 @@ import {
   BranchesOutlined,
   DatabaseOutlined,
 } from '@ant-design/icons';
+import LaptopScene from '@/components/LaptopScene';
 
 const { Title, Paragraph } = Typography;
 
-const bootLines = [
-  { text: '$ portix connect user@prod-server', color: '#34d399' },
-  { text: '→ establishing ssh connection...', color: '#64748b' },
-  { text: '✓ authenticated (ed25519)', color: '#34d399' },
-  { text: '✓ pty allocated — xterm-256color', color: '#34d399' },
-  { text: '✓ shell session active', color: '#34d399' },
-  { text: 'user@prod:~$ ', color: '#cbd5e1', cursor: true },
-];
-
 export default function Hero() {
-  const [visibleLines, setVisibleLines] = useState(0);
-
-  useEffect(() => {
-    if (visibleLines >= bootLines.length) return;
-    const t = setTimeout(() => setVisibleLines((v) => v + 1), visibleLines === 0 ? 500 : 380);
-    return () => clearTimeout(t);
-  }, [visibleLines]);
-
   return (
     <section
       id="top"
@@ -155,93 +138,9 @@ export default function Hero() {
             </Space>
           </div>
 
-          {/* Right: terminal mockup */}
+          {/* Right: interactive laptop */}
           <div className="animate-fade-up" style={{ animationDelay: '200ms' }}>
-            <div style={{ position: 'relative', maxWidth: 448, margin: '0 auto' }}>
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: -2,
-                  borderRadius: 14,
-                  background: 'linear-gradient(135deg, rgba(16,185,129,0.3), rgba(6,182,212,0.15))',
-                  opacity: 0.6,
-                  filter: 'blur(16px)',
-                }}
-                aria-hidden
-              />
-              <div
-                style={{
-                  position: 'relative',
-                  overflow: 'hidden',
-                  borderRadius: 12,
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  background: '#0b1018',
-                  boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
-                }}
-              >
-                {/* Title bar */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    borderBottom: '1px solid rgba(255,255,255,0.05)',
-                    background: '#0f1620',
-                    padding: '12px 16px',
-                  }}
-                >
-                  <span style={{ width: 12, height: 12, borderRadius: '50%', background: 'rgba(248,113,113,0.8)' }} />
-                  <span style={{ width: 12, height: 12, borderRadius: '50%', background: 'rgba(250,204,21,0.8)' }} />
-                  <span style={{ width: 12, height: 12, borderRadius: '50%', background: 'rgba(74,222,128,0.8)' }} />
-                  <span style={{ marginLeft: 8, fontSize: 12, color: '#64748b' }}>portix — bash</span>
-                </div>
-                {/* Tabs */}
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: 4,
-                    borderBottom: '1px solid rgba(255,255,255,0.05)',
-                    background: '#0b1018',
-                    padding: '8px 12px',
-                  }}
-                >
-                  <span style={{ borderRadius: 6, background: 'rgba(255,255,255,0.05)', padding: '4px 12px', fontSize: 12, color: '#fff' }}>prod-server</span>
-                  <span style={{ borderRadius: 6, padding: '4px 12px', fontSize: 12, color: '#64748b' }}>staging</span>
-                  <span style={{ borderRadius: 6, padding: '4px 12px', fontSize: 12, color: '#64748b' }}>db-1</span>
-                  <span style={{ marginLeft: 4, color: '#475569' }}>+</span>
-                </div>
-                {/* Body */}
-                <div
-                  className="font-mono"
-                  style={{
-                    padding: 16,
-                    fontFamily: '"JetBrains Mono", monospace',
-                    fontSize: 12,
-                    lineHeight: 1.6,
-                    minHeight: 220,
-                  }}
-                >
-                  {bootLines.slice(0, visibleLines).map((line, i) => (
-                    <div key={i} style={{ color: line.color }}>
-                      {line.text}
-                      {line.cursor && (
-                        <span
-                          style={{
-                            display: 'inline-block',
-                            marginLeft: 2,
-                            width: 8,
-                            height: 14,
-                            background: '#34d399',
-                            verticalAlign: 'middle',
-                            animation: 'blink 1.1s step-end infinite',
-                          }}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <LaptopScene className="hero-laptop" />
           </div>
         </div>
       </div>
